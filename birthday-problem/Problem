@@ -1,0 +1,16 @@
+Vonnue is a company that celebrates birthdays by cutting cakes on specific days of each week for all the birthdays happening in that week. The company follows the following rules:
+
+Cake cutting days: Determine the dates when cakes should be cut for birthdays happening in a given week.
+
+1. All Sundays are considered holidays and not suitable for cake cutting.
+2. Every month, the second Saturday is considered a holiday.
+3. In addition to the fixed holidays, there can be other holidays as well.
+4. If it's not possible to find a cake cutting day within a week due to holidays, the cake cutting will be postponed to the next week's last working day.
+5. If the next week is also a holiday, the cake cutting will be postponed to the next week's last working day, and so on.
+
+Holidays: Consider the fixed holidays (Sundays and second Saturdays of each month) along with any additional holidays while determining the cake cutting days.
+
+<!--
+Write a properly testable code to find out all the cake cutting days given an array of birthdays and a list of holidays, considering the rules mentioned above. Be sure to think about and handle any potential edge cases that may arise during the implementation.
+
+Please let me know if you have any further questions or clarifications! -->
