@@ -1,35 +1,9 @@
-const holidays = [
-  "Sat Aug 26 2023",
-  "Fri Aug 11 2023",
-  "Sat Aug 19 2023",
-  "Thu Aug 10 2023",
-  "Wed Aug 09 2023",
-  "Tue Aug 08 2023",
-  "Mon Aug 07 2023",
-];
+const holidays = ["Sat Aug 26 2023", "Fri Aug 11 2023", "Sat Aug 19 2023"];
 
 const datesArray = [
   new Date("2023-08-09"),
   new Date("2023-08-10"),
   new Date("2023-08-12"),
-  new Date("2023-08-14"),
-  new Date("2023-08-16"),
-  new Date("2023-08-18"),
-  new Date("2023-08-05"),
-  new Date("2023-09-10"),
-  new Date("2023-09-01"),
-  new Date("2023-09-24"),
-  new Date("2023-09-28"),
-  new Date("2023-09-06"),
-  new Date("2023-09-18"),
-  new Date("2023-09-05"),
-  new Date("2023-10-19"),
-  new Date("2023-10-31"),
-  new Date("2023-10-12"),
-  new Date("2023-10-24"),
-  new Date("2023-10-07"),
-  new Date("2023-10-30"),
-  new Date("2023-10-05"),
 ];
 
 let nextWorkingDayNotFound = false;
@@ -63,31 +37,16 @@ function isSecondSaturday(givenDate) {
       return true;
     }
   }
-
   return false;
 }
 
-const findLastWorkingDayOfTheWeek = (date, holidays) => {
+function findLastWorkingDayOfTheWeek(date, holidays) {
   const givenDate = new Date(date);
-
-  let daysToBeAdded;
-  if (givenDate.getDay() === 0) {
-    daysToBeAdded = 6;
-  } else if (givenDate.getDay() === 1) {
-    daysToBeAdded = 5;
-  } else if (givenDate.getDay() === 2) {
-    daysToBeAdded = 4;
-  } else if (givenDate.getDay() === 3) {
-    daysToBeAdded = 3;
-  } else if (givenDate.getDay() === 4) {
-    daysToBeAdded = 2;
-  } else if (givenDate.getDay() === 5) {
-    daysToBeAdded = 1;
-  } else {
-    daysToBeAdded = 0;
-  }
+  const givenDay = givenDate.getDay();
+  const daysToBeAdded = 6 - givenDay;
 
   givenDate.setDate(givenDate.getDate() + daysToBeAdded);
+
   while (
     holidays.includes(givenDate.toDateString()) ||
     isSecondSaturday(givenDate)
@@ -95,14 +54,10 @@ const findLastWorkingDayOfTheWeek = (date, holidays) => {
     givenDate.setDate(givenDate.getDate() - 1);
   }
 
-  if (givenDate.getDay() === 0) {
-    nextWorkingDayNotFound = true;
-  } else {
-    nextWorkingDayNotFound = false;
-  }
+  nextWorkingDayNotFound = givenDate.getDay() === 0;
 
   return givenDate;
-};
+}
 
 function findNextWeekLastWorkingDay(date, holidays) {
   let lastworkingDay;
@@ -127,7 +82,7 @@ function groupBirthdayDatesByWeek(datesArray) {
     const weekNumber = new Date(
       year,
       month,
-      date.getDate() + 3 - date.getDay()
+      date.getDate() - date.getDay()
     ).getTime();
 
     if (!groupedDates[weekNumber]) {
@@ -136,21 +91,15 @@ function groupBirthdayDatesByWeek(datesArray) {
 
     groupedDates[weekNumber].push(date);
   }
-
-  const groupedDatesArray = Object.values(groupedDates);
-
-  return groupedDatesArray;
+  return Object.values(groupedDates);
 }
 
-const groupedDatesArray = groupBirthdayDatesByWeek(datesArray);
+const cakeCuttingDays = groupBirthdayDatesByWeek(datesArray).map(
+  (birthDayWeek) => {
+    const lastIndex = birthDayWeek.length - 1;
+    const lastBirthDayOfTheWeek = birthDayWeek[lastIndex];
+    return findNextWeekLastWorkingDay(lastBirthDayOfTheWeek, holidays);
+  }
+);
 
-const cakeCuttingDays = groupedDatesArray.map((birthDayWeek) => {
-  const lastIndex = birthDayWeek.length - 1;
-  const lastBirthDayOfTheWeek = birthDayWeek[lastIndex];
-
-  const cakeCuttingDay = findNextWeekLastWorkingDay(
-    lastBirthDayOfTheWeek,
-    holidays
-  );
-  console.log({ cakeCuttingDay });
-});
+console.log(cakeCuttingDays);
