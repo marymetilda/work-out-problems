@@ -1,0 +1,6 @@
+## Instructions to run
+
+- It takes the data from the package.json file
+- So if the input needs to change, change package.json file.
+
+- To run this code run `node {relative path}` in the terminal.
