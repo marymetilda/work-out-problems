@@ -1,63 +1,46 @@
 const axios = require('axios');
-
 const data = require('./package.json');
 
-  // Extracting dependencies and devDependencies
-  const dependencies = data.dependencies;
-  const devDependencies = data.devDependencies;
-  
-  // Combining both dependencies and devDependencies
-  const allDependencies = { ...dependencies, ...devDependencies };
-  
-  // Function to fetch latest versions and licenses
-  async function getLatestVersionsAndLicenses(dependencies) {
-    const latestVersionsAndLicenses = {};
-  
+// Extracting all dependencies and devDependencies
+const allDependencies = { ...data.dependencies, ...data.devDependencies };
+
+// Function to fetch latest versions or licenses
+async function fetchLatestInfo() {
+  const latestInfo = [];
+  let csvData = 'Package Name,Current Version,Latest Version,License\n';
+
+  for (const packageName in allDependencies) {
     try {
-      const packageNames = Object.keys(dependencies);
-      const responses = await axios.all(
-        packageNames.map((packageName) =>
-          axios.get(`https://registry.npmjs.org/${packageName}/latest`)
-        )
-      );
-  
-      for (let i = 0; i < responses.length; i++) {
-        const packageName = packageNames[i];
-        const response = responses[i];
-        const { version, license } = response.data;
-        latestVersionsAndLicenses[packageName] = {
-          currentVersion: dependencies[packageName],
-          latestVersion: version,
-          license,
-        };
-      }
+      const response = await axios.get(`https://registry.npmjs.org/${packageName}/latest`);
+      const packageInfo = {
+        package: packageName,
+        license: response.data.license,
+        'latest-version': response.data.version,
+        'current-version': allDependencies[packageName],
+      };
+      latestInfo.push(packageInfo);
+      csvData += `${packageName},${allDependencies[packageName]},${response.data.version},${response.data.license}\n`;
     } catch (error) {
-      console.error('Error occurred while fetching latest versions and licenses:', error);
-      // Fallback to use the existing version and license from the data object
-      for (const packageName in dependencies) {
-        latestVersionsAndLicenses[packageName] = {
-          currentVersion: dependencies[packageName],
-          latestVersion: dependencies[packageName], // Fallback to current version
-          license: devDependencies[packageName] || '',
-        };
-      }
+      console.error(`Failed to fetch latest version or license for package: ${packageName}`);
+      const packageInfo = {
+        package: packageName,
+        license: allDependencies[packageName],
+        'latest-version': allDependencies[packageName], // Use the existing version or license as fallback
+        'current-version': allDependencies[packageName],
+      };
+      latestInfo.push(packageInfo);
+      csvData += `${packageName},${allDependencies[packageName]},${allDependencies[packageName]},${allDependencies[packageName]}\n`;
     }
-  
-    return latestVersionsAndLicenses;
   }
-  
-  // Fetch latest versions and licenses and assign it to a variable
-  const latestVersionsAndLicensesPromise = getLatestVersionsAndLicenses(allDependencies);
-  
-  // Convert the object to CSV format and log it
-  latestVersionsAndLicensesPromise.then((latestVersionsAndLicenses) => {
-    let csvData = 'Package Name,Current Version,Latest Version,License\n';
-    for (const packageName in latestVersionsAndLicenses) {
-      const { currentVersion, latestVersion, license } = latestVersionsAndLicenses[packageName];
-      csvData += `${packageName},${currentVersion},${latestVersion},${license}\n`;
-    }
+
+  return csvData;
+}
+
+// Fetch latest versions and licenses
+fetchLatestInfo()
+  .then((csvData) => {
     console.log(csvData);
-  }).catch((error) => {
-    console.error('Error occurred while fetching latest versions and licenses:', error);
+  })
+  .catch((error) => {
+    console.error('Error occurred while fetching latest info:', error);
   });
-  
